@@ -1,0 +1,29 @@
+# Windows:
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# intellij idea
+.idea
+build
+.gradle
+*.iml
+*/*.iml
+*/bin
+*/build
+
+# eclipse
+.settings
+*/.settings
+.project
+.classpath
+bin
+mac
+*.DS_Store
+python
+*.pyc
+*.log
+*/*.log
+*/log.*
+*/logs/*
+.svn

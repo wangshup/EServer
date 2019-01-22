@@ -1,0 +1,40 @@
+package com.dd.game.exceptions;
+
+public enum LoginExceptionType {
+    CURRENT("E100095"),
+    ACCOUNT_NOT_EXIST("E100096"),
+    ACCOUNT_EXIST_PF_ID("E100097"),
+    ACCOUNT_EXIST_DEVICE("E100098"),
+    ACCOUNT_TOKEN_ERROR("E100223"),
+    MOVED("E100099"),
+    BAN_TIME("E100100"),
+    PF_ID_BLANK("E100101"),
+    UID_PF_ID_NOT_MAPPING("E100102"),
+    SECURITY_CODE_NO("E100103"),
+    SECURITY_CODE_ERROR("E100104"),
+    SECURITY_CODE_CURRENT_TIME("E100105"),
+    AVG("E100106"),
+    WEB_STEAL_ACCOUNT("E100107"),
+    MOBILE_STEAL_ACCOUNT("E002"),
+    CENTER_SERVER_REGISTER("E100109"),
+    BATCH_REGISTER_COUNT_PER_MAC_ADDRESS("E100110"),
+    BATCH_REGISTER_NOT_CALL_SERVER_LIST("E100111"),
+    PACKAGE_NAME("E100112"),
+    TEST_SERVER_COUNT_DAILY("E100113"),
+    DATA_LOAD("E100114"),
+    JOIN_ZONE("E100115"),
+    BAN_IP("E100116"),
+    BAN_DEVICE("E100212"),
+    ROBBER("E100117"), 
+    REGISTER_PF_NOT_MATCH("E100231");
+
+    private String code;
+
+    LoginExceptionType(String code) {
+        this.code = code;
+    }
+
+    public String getCode() {
+        return code;
+    }
+}

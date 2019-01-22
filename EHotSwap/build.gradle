@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+version = '1.0'
+
+jar {
+    manifest {
+        attributes 'Premain-Class': 'com.dd.agent.HotSwapAgent',
+                'Agent-Class': 'com.dd.agent.HotSwapAgent',
+                'Can-Redefine-Classes': true,
+                'Can-Retransform-Classes': true
+    }
+}
+
+dependencies {
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'org.ow2.asm', name: 'asm', version: '7.0'
+    compile group: 'org.ow2.asm', name: 'asm-tree', version: '7.0'
+}
+
+task copyJars(type:Copy) {
+    from configurations.runtime
+    into '../runtime/lib' 
+}

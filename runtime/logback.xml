@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration  -->
+<!-- files in general, please contact the logback user mailing list -->
+<!-- at http://www.qos.ch/mailman/listinfo/logback-user             -->
+<!--                                                                -->
+<!-- For professional support please see                            -->
+<!--    http://www.qos.ch/shop/products/professionalSupport         -->
+<!--                                                                -->
+<configuration scan="true" scanPeriod="5 seconds">
+  <appender name="fileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!--See http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
+    <!--and http://logback.qos.ch/manual/appenders.html#TimeBasedRollingPolicy-->
+    <!--for further documentation-->    
+    <file>logs/eserver.log</file>
+    <encoder>
+		<pattern>%d|%level|%thread|%logger{40}|%msg%n%rEx</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>logs/eserver.log.%d{yyyy-MM-dd}</fileNamePattern>
+    </rollingPolicy>
+  </appender> 
+  
+ <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+      <!-- encoders are assigned by default the type
+           ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+      <encoder>
+          <pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern>
+      </encoder>
+  </appender>  
+
+  <root level="INFO">
+  	<appender-ref ref="fileAppender"/>
+    <appender-ref ref="STDOUT"/>
+  </root>
+</configuration>

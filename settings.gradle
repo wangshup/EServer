@@ -1,0 +1,8 @@
+rootProject.name = 'EServer'
+
+include 'EGate'          // 网关服务器
+include 'ECoreServer'    // 游戏底层架构和模块
+include 'EGameServer'    // 游戏业务逻辑服务器
+include 'EDataServer'	 // 数据中心服
+include 'EProto'		 // 协议
+include 'EHotSwap'       // 热更新

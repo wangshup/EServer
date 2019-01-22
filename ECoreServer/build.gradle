@@ -1,0 +1,36 @@
+apply plugin: 'java'
+version '1.0'
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    // Use 'jcenter' for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+}
+
+dependencies {
+	compile project(':EProto')
+    compile group: 'com.google.guava', name: 'guava', version: '26.0-jre'
+    compile group: 'org.javassist', name: 'javassist', version: '3.23.1-GA'
+    compile group: 'org.apache.commons', name: 'commons-configuration2', version: '2.3'
+    compile group: 'io.netty', name: 'netty-all', version: '4.1.20.Final'
+    compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.2.0'
+    compile group: 'org.apache.kafka', name: 'kafka-clients', version: '2.0.0'
+    compile group: 'org.apache.kafka', name: 'kafka_2.12', version: '2.0.0'
+    compile group: 'commons-io', name: 'commons-io', version: '2.6' 
+    compile group: 'com.maxmind.geoip2', name: 'geoip2', version: '2.12.0'
+    compile group: 'org.springframework.boot', name: 'spring-boot', version: '2.0.3.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-autoconfigure', version: '2.0.3.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter', version: '2.0.3.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.3.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-logging', version: '2.0.3.RELEASE'
+}
+
+task copyJars(type:Copy) {
+    from configurations.runtime
+    into '../runtime/lib' 
+}

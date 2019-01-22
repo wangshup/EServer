@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option java_package = "com.dd.protobuf"; 
+option java_outer_classname = "PushProtocol";
+
+message PushFunctionOpen{
+	string functions = 1;
+}

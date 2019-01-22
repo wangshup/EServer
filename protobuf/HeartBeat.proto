@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "com.dd.protobuf"; 
+option java_outer_classname = "HeartBeatProtocol";
+
+message CSHeartBeat
+{
+	string ClientTime = 1;
+}
+
+message SCHeartBeat
+{
+	string ServerTime = 1;
+}

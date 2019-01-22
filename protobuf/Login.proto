@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option java_package = "com.dd.protobuf"; 
+option java_outer_classname = "LoginProtocol";
+
+import "PBStruct.proto";
+
+message CSLogin
+{
+	string DeviceId  = 1;
+	string UserId    = 2;	
+	string zoneName  = 3;
+	string account   = 4;
+	string gaid      = 5;
+	string platform  = 6;
+	string country   = 7;
+	string appVer    = 8;
+	int32  protoVer  = 9;
+    bool   isQuiet   = 10;	
+}
+
+message SCLogin 
+{
+	PBPlayerInfo  PlayerInfo = 1;
+	string        functions  = 2;
+	string        serverTime = 3;
+	bool          isRegister = 4;
+	bool          inFighting = 5;
+	int32         sessionId  = 6;	
+	string        udpIp      = 7;
+	int32         udpPort    = 8;
+}

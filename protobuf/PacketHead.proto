@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "com.dd.protobuf"; 
+option java_outer_classname = "CommonProtocol";
+
+message PacketHead
+{
+	string ActionId = 1;
+	int32 ErrorCode = 2;
+	string ErrorInfo = 3;
+	int32 Sid = 4;
+	string Uid = 5;
+}

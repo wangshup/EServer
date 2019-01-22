@@ -1,0 +1,28 @@
+<Root>
+    <Data id="0" type1="1" para="0" gold="500" />
+    <Data id="1" type="1" para="1" gold="1000" />
+    <Data id="2" type="1" para="2" gold="1100" />
+    <Data id="3" type="1" para="3" gold="1200" />
+    <Data id="4" type="1" para="4" gold="1300" />
+    <Data id="5" type="1" para="5" gold="1400" />
+    <Data id="6" type="1" para="6" gold="1500" />
+    <Data id="7" type="1" para="7" gold="1600" />
+    <Data id="8" type="1" para="8" gold="1700" />
+    <Data id="9" type="1" para="9" gold="1800" />
+    <Data id="10" type="1" para="10" gold="1900" />
+    <Data id="11" type="1" para="11" gold="2000" />
+    <Data id="12" type="1" para="12" gold="2100" />
+    <Data id="13" type="1" para="13" gold="2200" />
+    <Data id="14" type="1" para="14" gold="2300" />
+    <Data id="15" type="1" para="15" gold="2400" />
+    <Data id="16" type="1" para="16" gold="2500" />
+    <Data id="17" type="1" para="17" gold="2600" />
+    <Data id="18" type="1" para="18" gold="2700" />
+    <Data id="19" type="1" para="19" gold="2800" />
+    <Data id="20" type="1" para="20" gold="2900" />
+    <Data id="21" type="1" para="21" gold="3000" />
+    <Data id="22" type="1" para="22" gold="3200" />
+    <Data id="23" type="1" para="23" gold="3400" />
+    <Data id="24" type="1" para="24" gold="3500" />
+    <Data id="25" type="1" para="25" gold="4000" />
+</Root>

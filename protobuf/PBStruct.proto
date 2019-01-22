@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+option java_package = "com.dd.protobuf"; 
+option java_outer_classname = "PBStructProtocol";
+
+message PBPlayerInfo
+{
+	string UserId = 1;	
+	int32 Power = 7;//体力
+	string Diamond = 8; //钻石（充值货币）
+	string Gold = 9;  //金币（游戏货币）
+	string Honor = 10;
+	string Medal = 11;
+	string Friendship = 12;
+	string nick = 14;
+	int32 powerBuyTimes = 15;
+	string payDiamond = 16;
+	int32 changeNameTimes = 17;
+	string powerRenewTime = 18;
+	string infoUpdateTime = 19;
+	int32 modId = 20; // 头像id
+	int32 serverId = 21;	
+	repeated int32 tips = 23; 		//主页提示小红点的id列表(1:有未领取奖励的任务)
+	int32 goldBuyTimes=24;
+	int32 level = 25;
+	string allianceId = 26;
+	int32 pvpPower = 27; // pvp体力
+	string pvpPowerRenewTime = 28;
+	string country = 29;
+	int32 marking = 30;	//玩家对游戏的评分(0:未评论，1:不喜欢，2:喜欢)
+}
+
+message PBValue
+{
+	oneof type{
+		int32 integer = 1;
+		int64 long = 2;
+		double double = 3;
+		string string = 4;
+		bool boolean = 5;
+		bool null = 6;
+		PBArray array = 7;
+		PBPair pair = 8;
+	}
+}
+
+message PBArray
+{
+	repeated PBValue values = 1;
+}
+
+message PBPair
+{
+	PBValue key = 1;
+	PBValue value = 2;
+}
