@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Tuple;
 
-import javax.sql.DataSource;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,6 +20,7 @@ import java.util.function.Consumer;
  *
  * @author wangshupeng
  */
+
 /**
  * Edata服务类
  *
@@ -783,6 +783,99 @@ public final class EData {
             return null;
         }
         return dbProxy.insertBatchAsync(callback, callbackExecutor, objs);
+    }
+
+    /**
+     * 增加（插入或替换）一条数据
+     *
+     * @param t 数据
+     * @throws Exception
+     */
+    public <T> boolean replace(T t) throws Exception {
+        return dbProxy.replace(t);
+    }
+
+    /**
+     * 异步增加（插入或替换）一条数据
+     *
+     * @param t 数据
+     * @return
+     */
+    public <T> Future<Boolean> replaceAsync(T t) {
+        return replaceAsync(null, null, t);
+    }
+
+    /**
+     * 异步增加（插入或替换）一条数据
+     *
+     * @param callback 插入回调接口
+     * @param t        数据
+     * @return
+     */
+    public <T> Future<Boolean> replaceAsync(Consumer<Boolean> callback, T t) {
+        return replaceAsync(callback, null, t);
+    }
+
+    /**
+     * 异步增加（插入或替换）一条数据
+     *
+     * @param callback         插入回调接口
+     * @param callbackExecutor 回调接口执行器
+     * @param t                数据
+     * @return
+     */
+    public <T> Future<Boolean> replaceAsync(Consumer<Boolean> callback, Executor callbackExecutor, T t) {
+        return dbProxy.replaceAsync(callback, callbackExecutor, t);
+    }
+
+    /**
+     * 增加（插入或替换）一组数据
+     *
+     * @param objs 数据列表
+     * @return
+     * @throws Exception
+     */
+    public <T> int[] replaceBatch(List<T> objs) throws Exception {
+        if (objs == null || objs.isEmpty()) {
+            return null;
+        }
+        return dbProxy.replaceBatch(objs);
+    }
+
+    /**
+     * 异步增加（插入或替换）一组数据
+     *
+     * @param objs 数据列表
+     * @return
+     */
+    public <T> Future<int[]> replaceBatchAsync(List<T> objs) {
+        return replaceBatchAsync(null, null, objs);
+    }
+
+    /**
+     * 异步增加（插入或替换）一组数据
+     *
+     * @param callback 插入数据回调接口
+     * @param objs     数据列表
+     * @return
+     */
+    public <T> Future<int[]> replaceBatchAsync(Consumer<int[]> callback, List<T> objs) {
+        return replaceBatchAsync(callback, null, objs);
+    }
+
+    /**
+     * 异步增加（插入或替换）一组数据
+     *
+     * @param callback         插入数据回调接口
+     * @param callbackExecutor 回调接口执行器
+     * @param objs             数据列表
+     * @return
+     */
+    public <T> Future<int[]> replaceBatchAsync(Consumer<int[]> callback, Executor callbackExecutor, List<T> objs) {
+        if (objs == null || objs.isEmpty()) {
+            return null;
+        }
+        return dbProxy.replaceBatchAsync(callback, callbackExecutor, objs);
     }
 
     /**

@@ -77,7 +77,7 @@ public abstract class AbstractDBServiceProxy implements IDBProxy {
         }
     }
 
-    public void propertiesReload(Properties props){
+    public void propertiesReload(Properties props) {
         this.dbService.propertiesReload(props);
     }
 
@@ -270,6 +270,30 @@ public abstract class AbstractDBServiceProxy implements IDBProxy {
     @Override
     public <T> int[] insertBatch(List<T> objs) throws Exception {
         return insertBatchAsync(null, null, objs).get();
+    }
+
+    /**
+     * 增加（插入）一条数据
+     *
+     * @param t 数据
+     * @throws Exception
+     */
+    @Override
+    public <T> boolean replace(T t) throws Exception {
+        return replaceAsync(null, null, t).get();
+    }
+
+
+    /**
+     * 增加（插入）一组数据
+     *
+     * @param objs 数据列表
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public <T> int[] replaceBatch(List<T> objs) throws Exception {
+        return replaceBatchAsync(null, null, objs).get();
     }
 
 

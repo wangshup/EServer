@@ -3,7 +3,6 @@ package com.dd.edata.db;
 import com.dd.edata.db.DBWhere.WhereCond;
 import com.dd.edata.db.annotation.*;
 import com.dd.edata.utils.Util;
-import com.mysql.jdbc.JDBC4PreparedStatement;
 import com.zaxxer.hikari.HikariConfigMXBean;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.beanutils.BeanUtils;
@@ -66,7 +65,9 @@ class DBService {
         System.arraycopy(wheres, 0, newWheres, 0, wheres.length);
         newWheres[wheres.length] = DBWhere.limit(1);
         List<T> l = selectList(clazz, columns, newWheres);
-        if (l == null || l.isEmpty()) return null;
+        if (l == null || l.isEmpty()) {
+            return null;
+        }
         return l.get(0);
     }
 
@@ -82,11 +83,12 @@ class DBService {
         String sql = makeSelectSql(clazz, columns, wheres);
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             try {
-                if (wheres.length > 0) {
+                if (wheres != null && wheres.length > 0) {
                     int index = 1;
                     for (DBWhere where : wheres) {
-                        if (where.getCond() == WhereCond.LIMIT || where.getCond() == WhereCond.ORDER_ASC || where.getCond() == WhereCond.ORDER_DESC)
+                        if (where.getCond() == WhereCond.LIMIT || where.getCond() == WhereCond.ORDER_ASC || where.getCond() == WhereCond.ORDER_DESC) {
                             break;
+                        }
                         if (where.getCond() == WhereCond.IN) {
                             List<?> values = (List<?>) where.getValue();
                             for (int i = 0; i < values.size(); ++i) {
@@ -98,35 +100,33 @@ class DBService {
                     }
                 }
 
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs != null) {
-                        ResultSetMetaData rsmd = rs.getMetaData();
-                        while (rs.next()) {
-                            T bean = (T) clazz.newInstance();
-                            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                                String columnName = rsmd.getColumnName(i);
-                                Object columnValue = rs.getObject(i);
-                                int type = rsmd.getColumnType(i);
-                                if (type == 93 && columnValue != null) {
-                                    Calendar cl = Calendar.getInstance();
-                                    cl.setTimeInMillis(rs.getTimestamp(i).getTime());
-                                    columnValue = cl.getTime();
-                                }
-                                Map<String, Field> fields = dbUtil.getFields(clazz);
-                                for (Field field : fields.values()) {
-                                    if (columnName.equalsIgnoreCase(Util.getColName(field)) && columnValue != null) {
-                                        Column ann = field.getAnnotation(Column.class);
-                                        BeanUtils.setProperty(bean, field.getName(), ann.isJson() ? Util.fromJson(columnValue.toString(), field.getGenericType()) : columnValue);
-                                        break;
-                                    }
+                ResultSet rs = stmt.executeQuery();
+                if (rs != null) {
+                    ResultSetMetaData rsmd = rs.getMetaData();
+                    while (rs.next()) {
+                        T bean = clazz.getDeclaredConstructor().newInstance();
+                        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                            String columnName = rsmd.getColumnName(i);
+                            Object columnValue = rs.getObject(i);
+                            int type = rsmd.getColumnType(i);
+                            if (type == 93 && columnValue != null) {
+                                Calendar cl = Calendar.getInstance();
+                                cl.setTimeInMillis(rs.getTimestamp(i).getTime());
+                                columnValue = cl.getTime();
+                            }
+                            Map<String, Field> fields = dbUtil.getFields(clazz);
+                            for (Field field : fields.values()) {
+                                if (columnName.equalsIgnoreCase(Util.getColName(field)) && columnValue != null) {
+                                    Column ann = field.getAnnotation(Column.class);
+                                    BeanUtils.setProperty(bean, field.getName(), ann.isJson() ? Util.fromJson(columnValue.toString(), field.getGenericType()) : columnValue);
+                                    break;
                                 }
                             }
-                            retList.add(bean);
                         }
+                        retList.add(bean);
                     }
                 }
             } catch (Exception e) {
-                logger.error("sql [{}] execute error!", ((JDBC4PreparedStatement) (stmt.unwrap(Statement.class))).asSql());
                 throw e;
             }
         }
@@ -145,8 +145,11 @@ class DBService {
             for (String column : columns) {
                 sb.append(delimiter);
                 Field f = fields.getOrDefault(column, null);
-                if (f != null) sb.append(Util.getColName(f));
-                else sb.append(column);
+                if (f != null) {
+                    sb.append(Util.getColName(f));
+                } else {
+                    sb.append(column);
+                }
                 delimiter = ",";
             }
             sb.append(" FROM ");
@@ -163,13 +166,14 @@ class DBService {
     protected <T> int count(Class<T> clazz, DBWhere... wheres) throws Exception {
         Arrays.sort(wheres, DBWhere.comparator);
         String sql = makeCountSql(clazz, wheres);
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql);) {
             try {
-                if (wheres.length > 0) {
+                if (wheres != null && wheres.length > 0) {
                     int index = 1;
                     for (DBWhere where : wheres) {
-                        if (where.getCond() == WhereCond.LIMIT || where.getCond() == WhereCond.ORDER_ASC || where.getCond() == WhereCond.ORDER_DESC)
+                        if (where.getCond() == WhereCond.LIMIT || where.getCond() == WhereCond.ORDER_ASC || where.getCond() == WhereCond.ORDER_DESC) {
                             break;
+                        }
                         if (where.getCond() == WhereCond.IN) {
                             List<?> values = (List<?>) where.getValue();
                             for (int i = 0; i < values.size(); ++i) {
@@ -181,13 +185,11 @@ class DBService {
                     }
                 }
 
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs != null) {
-                        while (rs.next()) return rs.getInt(1);
-                    }
+                ResultSet rs = stmt.executeQuery();
+                if (rs != null) {
+                    while (rs.next()) return rs.getInt(1);
                 }
             } catch (Exception e) {
-                logger.error("sql [{}] execute error!", ((JDBC4PreparedStatement) (stmt.unwrap(Statement.class))).asSql());
                 throw e;
             }
         }
@@ -266,11 +268,12 @@ class DBService {
         String sql = makeDeleteSql(clazz, wheres);
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql);) {
             try {
-                if (wheres.length > 0) {
+                if (wheres != null && wheres.length > 0) {
                     int index = 1;
                     for (DBWhere where : wheres) {
-                        if (where.getCond() == WhereCond.LIMIT || where.getCond() == WhereCond.ORDER_ASC || where.getCond() == WhereCond.ORDER_DESC)
+                        if (where.getCond() == WhereCond.LIMIT || where.getCond() == WhereCond.ORDER_ASC || where.getCond() == WhereCond.ORDER_DESC) {
                             break;
+                        }
                         if (where.getCond() == WhereCond.IN) {
                             List<?> values = (List<?>) where.getValue();
                             for (int i = 0; i < values.size(); ++i) {
@@ -283,7 +286,6 @@ class DBService {
                 }
                 return stmt.execute();
             } catch (Exception e) {
-                logger.error("sql [{}] execute error!", ((JDBC4PreparedStatement) (stmt.unwrap(Statement.class))).asSql());
                 throw e;
             }
         }
@@ -305,7 +307,6 @@ class DBService {
                 }
                 return stmt.execute();
             } catch (Exception e) {
-                logger.error("sql [{}] execute error!", ((JDBC4PreparedStatement) (stmt.unwrap(Statement.class))).asSql());
                 throw e;
             }
         }
@@ -319,10 +320,8 @@ class DBService {
             return new int[]{};
         }
         String sql = makeDeleteSql(objs.get(0).getClass());
-        StringBuilder sb = new StringBuilder(objs.size());
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql);) {
             try {
-                JDBC4PreparedStatement unwrap = ((JDBC4PreparedStatement) (stmt.unwrap(Statement.class)));
                 conn.setAutoCommit(false);
                 for (T o : objs) {
                     Iterator<Field> primaryKeyIter = dbUtil.getPrimaryKeys(o.getClass()).iterator();
@@ -333,15 +332,12 @@ class DBService {
                         stmt.setObject(index++, ann.isJson() ? Util.toJson(f.get(o)) : f.get(o));
                     }
                     stmt.addBatch();
-                    sb.append(unwrap.asSql());
-                    sb.append("; ");
                 }
                 int[] ret = stmt.executeBatch();
                 conn.commit();
                 return ret;
             } catch (SQLException e) {
                 conn.rollback();
-                logger.error("sql [{}] execute error!", sb.toString());
                 throw e;
             } finally {
                 conn.setAutoCommit(true);
@@ -406,10 +402,11 @@ class DBService {
             try {
                 int index = 1;
                 stmt.setObject(index++, value);
-                if (wheres.length > 0) {
+                if (wheres != null && wheres.length > 0) {
                     for (DBWhere where : wheres) {
-                        if (where.getCond() == WhereCond.LIMIT || where.getCond() == WhereCond.ORDER_ASC || where.getCond() == WhereCond.ORDER_DESC)
+                        if (where.getCond() == WhereCond.LIMIT || where.getCond() == WhereCond.ORDER_ASC || where.getCond() == WhereCond.ORDER_DESC) {
                             break;
+                        }
                         if (where.getCond() == WhereCond.IN) {
                             List<?> values = (List<?>) where.getValue();
                             for (int i = 0; i < values.size(); ++i) {
@@ -422,7 +419,6 @@ class DBService {
                 }
                 return stmt.executeUpdate();
             } catch (Exception e) {
-                logger.error("sql [{}] execute error!", ((JDBC4PreparedStatement) (stmt.unwrap(Statement.class))).asSql());
                 throw e;
             }
         }
@@ -453,7 +449,6 @@ class DBService {
                 }
                 return stmt.executeUpdate();
             } catch (Exception e) {
-                logger.error("sql [{}] execute error!", ((JDBC4PreparedStatement) (stmt.unwrap(Statement.class))).asSql());
                 throw e;
             }
         }
@@ -468,10 +463,8 @@ class DBService {
         }
 
         String sql = makeUpdateSql(objs.get(0).getClass());
-        StringBuilder sb = new StringBuilder(objs.size());
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql);) {
             try {
-                JDBC4PreparedStatement unwrap = ((JDBC4PreparedStatement) (stmt.unwrap(Statement.class)));
                 conn.setAutoCommit(false);
                 for (T o : objs) {
                     Map<String, Field> fieldMap = dbUtil.getFields(o.getClass());
@@ -488,15 +481,12 @@ class DBService {
                         stmt.setObject(index++, ann.isJson() ? Util.toJson(f.get(o)) : f.get(o));
                     }
                     stmt.addBatch();
-                    sb.append(unwrap.asSql());
-                    sb.append("; ");
                 }
                 int[] ret = stmt.executeBatch();
                 conn.commit();
                 return ret;
             } catch (Exception e) {
                 conn.rollback();
-                logger.error("sql [{}] execute error!", sb.toString());
                 throw e;
             } finally {
                 conn.setAutoCommit(true);
@@ -535,8 +525,8 @@ class DBService {
      *
      * @throws Exception
      */
-    protected <T> boolean insert(T t) throws Exception {
-        String sql = makeInsertSql(t.getClass());
+    protected <T> boolean insertOrReplace(T t, boolean replace) throws Exception {
+        String sql = makeInsertOrReplaceSql(t.getClass(), replace);
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
             try {
                 Map<String, Field> fieldMap = dbUtil.getFields(t.getClass());
@@ -559,48 +549,23 @@ class DBService {
                 }
                 return b;
             } catch (Exception e) {
-                logger.error("sql [{}] execute error!", ((JDBC4PreparedStatement) (stmt.unwrap(Statement.class))).asSql());
                 throw e;
             }
         }
     }
 
-    private <T> String makeInsertSql(Class<T> clazz) throws Exception {
-        String tableName = dbUtil.getTableName(clazz);
-        StringBuilder sb = new StringBuilder();
-        StringBuilder sbValues = new StringBuilder();
-        sb.append("INSERT INTO ").append(tableName).append(" (");
-        sbValues.append(") VALUES (");
-        Map<String, Field> fieldMap = dbUtil.getFields(clazz);
-        String separator = "";
-        for (Field f : fieldMap.values()) {
-            Column colann = f.getAnnotation(Column.class);
-            if (colann != null && colann.autoIncrement()) continue;
-            sb.append(separator);
-            sb.append(Util.getColName(f));
-            sbValues.append(separator);
-            sbValues.append("?");
-            separator = ",";
-        }
-
-        sb.append(sbValues).append(")");
-        return sb.toString();
-    }
-
     /**
      * 批量插入操作
      */
-    protected <T> int[] batchInsert(List<T> objs) throws Exception {
+    protected <T> int[] batchInsertOrReplace(List<T> objs, boolean replace) throws Exception {
         if (objs.isEmpty()) {
             return new int[]{};
         }
 
-        String sql = makeInsertSql(objs.get(0).getClass());
-        StringBuilder sb = new StringBuilder(objs.size());
+        String sql = makeInsertOrReplaceSql(objs.get(0).getClass(), replace);
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
             try {
                 conn.setAutoCommit(false);
-                JDBC4PreparedStatement unwrap = ((JDBC4PreparedStatement) (stmt.unwrap(Statement.class)));
                 Field autoIncrField = null;
                 for (T o : objs) {
                     Map<String, Field> fieldMap = dbUtil.getFields(o.getClass());
@@ -614,8 +579,6 @@ class DBService {
                         stmt.setObject(index++, ann.isJson() ? Util.toJson(f.get(o)) : f.get(o));
                     }
                     stmt.addBatch();
-                    sb.append(unwrap.asSql());
-                    sb.append("; ");
                 }
 
                 int[] ret = stmt.executeBatch();
@@ -623,14 +586,15 @@ class DBService {
                 if (autoIncrField != null) {
                     ResultSet rs = stmt.getGeneratedKeys();
                     for (T o : objs) {
-                        if (!rs.next()) break;
+                        if (!rs.next()) {
+                            break;
+                        }
                         BeanUtils.copyProperty(o, autoIncrField.getName(), rs.getObject(1));
                     }
                 }
                 return ret;
             } catch (Exception e) {
                 conn.rollback();
-                logger.error("sql [{}] execute error!", sb.toString());
                 throw e;
             } finally {
                 conn.setAutoCommit(true);
@@ -638,13 +602,40 @@ class DBService {
         }
     }
 
+    private <T> String makeInsertOrReplaceSql(Class<T> clazz, boolean replace) throws Exception {
+        String tableName = dbUtil.getTableName(clazz);
+        StringBuilder sb = new StringBuilder();
+        StringBuilder sbValues = new StringBuilder();
+        if (replace)
+            sb.append("REPLACE INTO ").append(tableName).append(" (");
+        else
+            sb.append("INSERT INTO ").append(tableName).append(" (");
+        sbValues.append(") VALUES (");
+        Map<String, Field> fieldMap = dbUtil.getFields(clazz);
+        String separator = "";
+        for (Field f : fieldMap.values()) {
+            Column colann = f.getAnnotation(Column.class);
+            if (colann != null && colann.autoIncrement()) {
+                continue;
+            }
+            sb.append(separator);
+            sb.append(Util.getColName(f));
+            sbValues.append(separator);
+            sbValues.append("?");
+            separator = ",";
+        }
+
+        sb.append(sbValues).append(")");
+        return sb.toString();
+    }
+
+
     protected <T> boolean truncate(Class<T> clazz) throws Exception {
         String tableName = dbUtil.getTableName(clazz);
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement((isCobar ? "delete from " : "TRUNCATE TABLE ") + tableName);) {
             try {
                 return stmt.execute();
             } catch (Exception e) {
-                logger.error("sql [{}] execute error!", ((JDBC4PreparedStatement) (stmt.unwrap(Statement.class))).asSql());
                 throw e;
             }
         }
@@ -696,7 +687,9 @@ class DBService {
             }
             for (Field f : fieldList) {
                 Column colann = f.getAnnotation(Column.class);
-                if (colann == null) continue;
+                if (colann == null) {
+                    continue;
+                }
                 String colName = Util.getColName(f);
                 f.setAccessible(true);
                 fieldMap.put(f.getName(), f);
@@ -790,11 +783,16 @@ class DBService {
             StringBuffer sb = new StringBuffer();
             sb.append("select COLUMN_NAME, COLUMN_TYPE from information_schema.columns where table_name = '");
             sb.append(tableName);
-            if (!isCobar) sb.append("' and table_schema = '");
-            try (Connection conn = getConnection()) {
-                if (!isCobar) sb.append(conn.getCatalog());
+            if (!isCobar) {
+                sb.append("' and table_schema = '");
+            }
+            try (Connection conn = getConnection();) {
+                if (!isCobar) {
+                    sb.append(conn.getCatalog());
+                }
                 sb.append("'");
-                try (PreparedStatement stmt = conn.prepareStatement(sb.toString()); ResultSet rs = stmt.executeQuery()) {
+                try (PreparedStatement stmt = conn.prepareStatement(sb.toString())) {
+                    ResultSet rs = stmt.executeQuery();
                     Map<String, List<String>> columns = new HashMap<>();
                     while (rs.next()) {
                         String k = rs.getString(1).toUpperCase();
@@ -810,7 +808,9 @@ class DBService {
                     Map<String, Field> fields = getFields(clazz);
                     for (Field f : fields.values()) {
                         Column ann = f.getAnnotation(Column.class);
-                        if (ann == null) continue;
+                        if (ann == null) {
+                            continue;
+                        }
                         String colName = Util.getColName(f).toUpperCase();
                         if (!columns.containsKey(colName)) {
                             addField(f, tableName);
@@ -822,6 +822,7 @@ class DBService {
                                     break;
                                 }
                             }
+
                         }
                     }
                 }
@@ -896,8 +897,11 @@ class DBService {
                 for (String member : primaryKey.members()) {
                     primaryKeyMemebers.append(sperator);
                     Field f = fields.getOrDefault(member, null);
-                    if (f != null) primaryKeyMemebers.append(Util.getColName(f));
-                    else primaryKeyMemebers.append(member);
+                    if (f != null) {
+                        primaryKeyMemebers.append(Util.getColName(f));
+                    } else {
+                        primaryKeyMemebers.append(member);
+                    }
                     sperator = ", ";
                 }
                 if (primaryKeyMemebers.length() > 0) {
@@ -911,8 +915,11 @@ class DBService {
                     for (String member : ti.members()) {
                         indexMemebers.append(sperator);
                         Field f = fields.getOrDefault(member, null);
-                        if (f != null) indexMemebers.append(Util.getColName(f));
-                        else indexMemebers.append(member);
+                        if (f != null) {
+                            indexMemebers.append(Util.getColName(f));
+                        } else {
+                            indexMemebers.append(member);
+                        }
                         sperator = ", ";
                     }
                     sql.append(", KEY ").append(ti.name()).append(" (").append(indexMemebers).append(")");
@@ -969,7 +976,9 @@ class DBService {
 
         private void getField(Class<?> c, List<Field> l) {
             Class<?> sc = c.getSuperclass();
-            if (sc != null) getField(sc, l);
+            if (sc != null) {
+                getField(sc, l);
+            }
             for (Field f : c.getDeclaredFields())
                 l.add(f);
         }
