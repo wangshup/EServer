@@ -10,7 +10,7 @@ import com.dd.game.module.job.GameSchedule;
 import com.dd.game.utils.Constants;
 import com.dd.game.web.proxy.WebProxyImpl;
 import com.dd.server.Server;
-import com.dd.server.mq.MQService;
+import com.dd.server.mq.service.MQService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
@@ -139,10 +139,10 @@ public final class GameEngine {
         return Boolean.parseBoolean(getConfigProperties().getProperty("server.test", "false"));
     }
 
-    private void initMqService() {
+    private void initMqService() throws Exception {
         MQService mq = Server.getInstance().getMQService();
         if (mq != null) {
-            mq.registerConsume(Constants.SERVER_ID);
+            mq.registerConsumer(Constants.SERVER_ID);
             logger.info("mq service started");
         } else {
             logger.warn("mq service not start!!!");

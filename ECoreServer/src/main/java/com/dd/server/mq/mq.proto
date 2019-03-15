@@ -5,12 +5,10 @@ option java_outer_classname = "MqProto";
 
 message MsgHead
 {
-    int64 id       = 1;
-    int32 srcSid   = 2;
-	int32 dstSid   = 3;
-	int32 cmdId    = 4;
-	int64 uid      = 5;
-	int32 errCode  = 6;
-	string errInfo = 7;
-	int32 errdesc  = 8;
+    int32 srcSid   = 1;
+	int32 dstSid   = 2;
+	int32 msgId    = 3;
+	int64 sequence = 4
+	int32 errCode  = 5;
+	string errInfo = 6;
 }

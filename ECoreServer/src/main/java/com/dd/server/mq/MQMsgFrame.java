@@ -1,6 +1,5 @@
 package com.dd.server.mq;
 
-import com.dd.server.mq.MqProto.MsgHead;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.DecoderException;
@@ -71,10 +70,15 @@ public class MQMsgFrame {
     }
 
     public static MQMsgFrame responseEncode(MQMsg msg) {
-        MsgHead head = msg.getHead();
+        MqProto.MsgHead head = msg.getHead();
         ByteBuf headBuffer = Unpooled.wrappedBuffer(head.toByteArray());
-        com.google.protobuf.Message body = msg.getBody();
-        ByteBuf dataBuffer = Unpooled.wrappedBuffer(body != null ? body.toByteArray() : new byte[0]);
+        byte[] data = new byte[0];
+        if (msg.getBody() != null) {
+            if (msg.getBody() instanceof com.google.protobuf.Message)
+                data = ((com.google.protobuf.Message) msg.getBody()).toByteArray();
+            else data = msg.getBody();
+        }
+        ByteBuf dataBuffer = Unpooled.wrappedBuffer(data);
         MQMsgFrame wrapper = new MQMsgFrame();
         wrapper.setHeadFrame(headBuffer);
         wrapper.setDataFrame(dataBuffer);

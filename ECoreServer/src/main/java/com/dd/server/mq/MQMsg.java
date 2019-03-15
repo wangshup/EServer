@@ -1,57 +1,63 @@
 package com.dd.server.mq;
 
-import com.dd.server.mq.MqProto.MsgHead;
-import com.dd.server.utils.BytesHolder;
 import com.dd.server.utils.IdWorker;
-import com.dd.server.utils.BytesHolder.CompositeByte;
 
-import io.netty.buffer.ByteBuf;
-
-public class MQMsg {
-    private static final BytesHolder byteHolder = new BytesHolder();
+class MQMsg {
     private MQMsgFrame frame;
-    protected MsgHead head;
-    protected Object body;
-    protected int bodyLen;
+    private MqProto.MsgHead head;
+    private Object body;
 
-    public MQMsg() {
+    MQMsg() {
     }
 
-    public MQMsg(MQMsgFrame frame) {
+    MQMsg(MQMsgFrame frame) {
         this.frame = frame;
     }
 
-    public MQMsg(long id, int srcSid, int dstSid, long uid, MQMsgType msgType, com.google.protobuf.Message msg) {
-        MsgHead.Builder hBuilder = MsgHead.newBuilder();
-        hBuilder.setCmdId(msgType.getMsgId());
+    MQMsg(int srcSid, int dstSid, short msgId, long sequence, int error, byte[] data) {
+        MqProto.MsgHead.Builder hBuilder = MqProto.MsgHead.newBuilder();
+        hBuilder.setMsgId(msgId);
         hBuilder.setSrcSid(srcSid);
         hBuilder.setDstSid(dstSid);
-        hBuilder.setUid(uid);
-        hBuilder.setId(id);
+        hBuilder.setErrCode(error);
+        hBuilder.setSequence(sequence);
         this.head = hBuilder.build();
-        if (msg != null) {
-            this.body = msg;
-        }
+        this.body = data;
     }
 
-    public MQMsg(int srcSid, int dstSid, long uid, MQMsgType msgType, com.google.protobuf.Message msg) {
-        this(IdWorker.nextId(srcSid), srcSid, dstSid, uid, msgType, msg);
+    MQMsg(int srcSid, int dstSid, short msgId, int error, byte[] data) {
+        this(srcSid, dstSid, msgId, IdWorker.nextId(srcSid), error, data);
     }
 
-    public MQMsg(MsgHead reqHead, MQMsgType msgType, com.google.protobuf.Message msg) {
-        this(reqHead.getId(), reqHead.getDstSid(), reqHead.getSrcSid(), reqHead.getUid(), msgType, msg);
+    short getMsgId() {
+        return (short) head.getMsgId();
     }
 
-    public int getId() {
-        return head.getCmdId();
+    long getSequence() {
+        return head.getSequence();
     }
 
-    public MsgHead getHead() {
+    int getSrcSid() {
+        return head.getSrcSid();
+    }
+
+    int getDstSid() {
+        return head.getDstSid();
+    }
+
+    int getErrCode() {
+        return head.getErrCode();
+    }
+
+    String getErrInfo() {
+        return head.getErrInfo();
+    }
+
+    public MqProto.MsgHead getHead() {
         return head;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T getBody() {
+    <T> T getBody() {
         return (T) body;
     }
 
@@ -59,40 +65,30 @@ public class MQMsg {
         this.body = body;
     }
 
-    public int getBodyLen() {
-        return bodyLen;
-    }
-
-    public void setBodyLen(int bodyLen) {
-        this.bodyLen = bodyLen;
-    }
-
-    public MQMsg decode() throws Exception {
-        CompositeByte headBytes = getBytes(frame.getHeadFrame());
-        head = MsgHead.newBuilder().mergeFrom(headBytes.data, 0, headBytes.length).build();
-        CompositeByte bodyBytes = getBytes(frame.getDataFrame());
-        this.body = bodyBytes.data;
-        this.bodyLen = bodyBytes.length;
+    MQMsg decode() throws Exception {
+        byte[] headData = new byte[frame.getHeadFrame().readableBytes()];
+        frame.getHeadFrame().readBytes(headData);
+        head = MqProto.MsgHead.parseFrom(headData);
+        this.body = new byte[frame.getDataFrame().readableBytes()];
+        frame.getDataFrame().readBytes((byte[]) body);
         return this;
     }
 
-    private static CompositeByte getBytes(ByteBuf buf) {
-        int len = buf.readableBytes();
-        CompositeByte bytes = byteHolder.getCompositeByte(len);
-        buf.readBytes(bytes.data, 0, len);
-        return bytes;
-    }
-
-    public MQMsg retain() {
+    MQMsg retain() {
         if (frame != null) {
             frame.retain();
         }
         return this;
     }
 
-    public void release() {
+    void release() {
         if (frame != null) {
             frame.release();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "MQMsg{" + "head=" + head + ", body=" + body + '}';
     }
 }

@@ -1,6 +1,6 @@
 package com.dd.server;
 
-import com.dd.server.mq.MQService;
+import com.dd.server.mq.service.MQService;
 import com.dd.server.services.*;
 import com.dd.server.utils.AsciiArt;
 import com.dd.server.utils.FileListener;
