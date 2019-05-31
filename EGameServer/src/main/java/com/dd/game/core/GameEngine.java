@@ -80,7 +80,7 @@ public final class GameEngine {
     }
 
     private void initServerInfo() throws Exception {
-        ServerInfoModel model = edata.select(ServerInfoModel.class, DBWhere.equal("id", ZONE_ID));
+        ServerInfoModel model = edata.select(ServerInfoModel.class, DBWhere.EQ("id", ZONE_ID));
         if (model == null) {
             model = new ServerInfoModel();
             model.setId(ZONE_ID);

@@ -41,13 +41,13 @@ public class EDataTest {
         }, list);
 
         //同步查询一条数据
-        User u = edata.select(User.class, DBWhere.equal("id", 0));
+        User u = edata.select(User.class, DBWhere.EQ("id", 0));
         System.out.println(u);
 
         //异步查询一条数据
         edata.selectAsync((user) -> {
             System.out.println(user);
-        }, User.class, DBWhere.equal("id", 1));
+        }, User.class, DBWhere.EQ("id", 1));
 
         //异步查询一组数据
         edata.selectListAsync((users) -> {

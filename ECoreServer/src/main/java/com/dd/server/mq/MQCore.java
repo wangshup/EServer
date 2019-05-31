@@ -3,6 +3,7 @@ package com.dd.server.mq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -83,9 +84,9 @@ public class MQCore {
                     return;
                 }
 
-                //error response msg
-                if (msg.getErrCode() != 0) {
-                    logger.error("Response Msg [id: {}, from: {}] handler not found!", msg.getMsgId(), msg.getSrcSid());
+                //response msg
+                if (msg.getMsgId() < 0) {
+                    logger.warn("Response Msg [id: {}, from: {}] handler not found!", msg.getMsgId() * -1, msg.getSrcSid());
                     return;
                 }
 
@@ -94,10 +95,14 @@ public class MQCore {
                 if (handler != null) {
                     try {
                         byte[] resp = handler.handle(msg.getSequence(), msg.getSrcSid(), msg.getErrCode(), msg.getBody());
-                        if (resp != null)
-                            send(msg.getDstSid(), msg.getSrcSid(), msg.getMsgId(), msg.getSequence(), 0, resp);
+                        if (resp != null) { //response msg的ID用请求的ID的负值，以区分请求
+                            send(msg.getDstSid(), msg.getSrcSid(), (short) (msg.getMsgId() * -1), msg.getSequence(), 0, resp);
+                        }
                     } catch (MqException e) {
-                        send(msg.getDstSid(), msg.getSrcSid(), msg.getMsgId(), msg.getSequence(), e.getError(), null);
+                        //response msg的ID用请求的ID的负值，以区分请求
+                        byte[] error = e.getMessage() == null ? null : e.getMessage().getBytes(StandardCharsets.UTF_8);
+                        send(msg.getDstSid(), msg.getSrcSid(), (short) (msg.getMsgId() * -1), msg.getSequence(), e.getError(), error);
+                        throw e;
                     }
                 } else {
                     logger.error("Msg [id: {}, from: {}] handler not found!", msg.getMsgId(), msg.getSrcSid());

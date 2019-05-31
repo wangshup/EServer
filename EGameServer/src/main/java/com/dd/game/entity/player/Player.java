@@ -109,7 +109,7 @@ public class Player extends BaseEntity implements ICacheable<Long> {
     }
 
     public static Player load(long id) throws Exception {
-        DBWhere where = DBWhere.equal("id", id);
+        DBWhere where = DBWhere.EQ("id", id);
         PlayerModel playerModel = GameEngine.getEData().select(PlayerModel.class, where);
         if (playerModel == null) return null;
         Player player = new Player(playerModel);

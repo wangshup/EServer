@@ -4,10 +4,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 public final class CommonUtils {
-    private static final Logger logger = LoggerFactory.getLogger(Http.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
+
+    private static String[] chars = new String[]{"a", "b", "c", "d", "e", "f",//
+            "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s",//
+            "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5",//
+            "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I",//
+            "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",//
+            "W", "X", "Y", "Z"};
 
     private CommonUtils() {
     }
@@ -85,7 +93,7 @@ public final class CommonUtils {
     }
 
     public static <K> Set<K> string2set(String content, Class<K> kClass, String separator) {
-        Set<K> set = new HashSet<K>();
+        Set<K> set = new HashSet<>();
         if (StringUtils.isBlank(content)) {
             return set;
         }
@@ -116,5 +124,42 @@ public final class CommonUtils {
     static int ceilingPowerOfTwo(int x) {
         // From Hacker's Delight, Chapter 3, Harry S. Warren Jr.
         return 1 << -Integer.numberOfLeadingZeros(x - 1);
+    }
+
+    public static String generateShortUuid() {
+        StringBuffer shortBuffer = new StringBuffer();
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        for (int i = 0; i < 8; i++) {
+            String str = uuid.substring(i * 4, i * 4 + 4);
+            int x = Integer.parseInt(str, 16);
+            shortBuffer.append(chars[x % 0x3E]);
+        }
+        return shortBuffer.toString();
+    }
+
+    public final static String getIpAddress(HttpServletRequest request) {
+        // 获取请求主机IP地址,如果通过代理进来，则透过防火墙获取真实IP地址
+        String ip = request.getHeader("X-Forwarded-For");
+
+        if (StringUtils.isEmpty(ip) || StringUtils.equalsIgnoreCase("unknown", ip)) {
+            if (StringUtils.isEmpty(ip) || StringUtils.equalsIgnoreCase("unknown", ip)) {
+                ip = request.getHeader("Proxy-Client-IP");
+            }
+            if (StringUtils.isEmpty(ip) || StringUtils.equalsIgnoreCase("unknown", ip)) {
+                ip = request.getHeader("WL-Proxy-Client-IP");
+            }
+            if (StringUtils.isEmpty(ip) || StringUtils.equalsIgnoreCase("unknown", ip)) {
+                ip = request.getHeader("HTTP_CLIENT_IP");
+            }
+            if (StringUtils.isEmpty(ip) || StringUtils.equalsIgnoreCase("unknown", ip)) {
+                ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+            }
+            if (StringUtils.isEmpty(ip) || StringUtils.equalsIgnoreCase("unknown", ip)) {
+                ip = request.getRemoteAddr();
+            }
+        } else if (ip != null && ip.length() > 15) {
+            ip = ip.substring(0, ip.indexOf(","));
+        }
+        return ip;
     }
 }

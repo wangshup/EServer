@@ -180,7 +180,7 @@ public class WorldMapManager {
     //}
 
     private boolean hasInit2DB() throws Exception {
-        return GameEngine.getEData().select(WorldPointModel.class, DBWhere.equal("id", 0)) != null;
+        return GameEngine.getEData().select(WorldPointModel.class, DBWhere.EQ("id", 0)) != null;
     }
 
     private Area getArea(int areaId) {
@@ -595,7 +595,7 @@ public class WorldMapManager {
                 } catch (InterruptedException e) {
                     logger.error("refresher sleep error!", e);
                 }
-            }), WorldPointModel.class, Lists.newArrayList("id"), DBWhere.equal("obj_type", getType().getType()));
+            }), WorldPointModel.class, Lists.newArrayList("id"), DBWhere.EQ("obj_type", getType().getType()));
             addRefreshJob();
         }
 

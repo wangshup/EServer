@@ -1,6 +1,7 @@
 package com.dd.game.web.proxy;
 
-import com.dd.game.utils.hotswap.HotSwapV2;
+import com.dd.agent.HotSwapV2;
+import com.dd.game.utils.Constants;
 import com.dd.server.http.WebProxy;
 import com.dd.server.utils.GameActionStatistics;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class WebProxyImpl implements WebProxy {
 
     @Override
     public String hotswap() {
-        return HotSwapV2.reloadClass();
+        return HotSwapV2.reloadClass(Constants.SERVER_ID,"com.dd.game");
     }
 
     @Override

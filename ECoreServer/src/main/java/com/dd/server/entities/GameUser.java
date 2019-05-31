@@ -114,7 +114,7 @@ public class GameUser implements IUser {
     @Override
     public void doDisconnect(ClientDisconnectionReason reason) {
         try {
-            Map<ServerEventParam, Object> evtParams = new HashMap<ServerEventParam, Object>();
+            Map<ServerEventParam, Object> evtParams = new HashMap<>();
             evtParams.put(ServerEventParam.USER, this);
             evtParams.put(ServerEventParam.DISCONNECTION_REASON, reason);
             if (zone != null && zone.getExtension() != null)

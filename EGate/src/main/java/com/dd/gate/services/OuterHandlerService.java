@@ -71,7 +71,7 @@ public class OuterHandlerService extends AbstractService {
                 } finally {
                     buf.release();
                 }
-            }, session.getExecutor(), UserModel.class, DBWhere.equal("deviceId", deviceId));
+            }, session.getExecutor(), UserModel.class, DBWhere.EQ("deviceId", deviceId));
         } catch (Throwable t) {
             session.getChannel().pipeline().fireExceptionCaught(t);
             logger.error("[gate] {} handler error,outer channel will be closed!!", session, t);

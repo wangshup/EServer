@@ -3,6 +3,7 @@ package com.dd.server.gateclient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -63,6 +64,7 @@ public class NettyBasedClientService implements INetworkService {
 		private Channel channel;
 		private ScheduledFuture<?> pingpongTask;
 		private volatile boolean shutdown = false;
+		private ExecutorService executor = Executors.newSingleThreadExecutor();
 
 		public Client(String ip, int port) {
 			this.ip = ip;
@@ -70,7 +72,7 @@ public class NettyBasedClientService implements INetworkService {
 		}
 
 		public void connect() {
-			Executors.newSingleThreadExecutor().submit(() -> {
+			executor.submit(() -> {
 				EventLoopGroup group = new NioEventLoopGroup(1, new ServerThreadFactory("Netty-Client"));
 				try {
 					Bootstrap b = new Bootstrap();

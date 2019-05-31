@@ -43,7 +43,7 @@ public class LoginEventHandler extends AbstractEventHandler {
         }
 
         try {
-            PlayerModel playerModel = GameEngine.getEData().select(PlayerModel.class, DBWhere.equal("deviceId", login.getDeviceId()));
+            PlayerModel playerModel = GameEngine.getEData().select(PlayerModel.class, DBWhere.EQ("deviceId", login.getDeviceId()));
             Player player;
             SCLogin.Builder builder = SCLogin.newBuilder();
             String strAppVer = login.getAppVer() != null ? login.getAppVer() : "1.0.0";
